@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Product Review AI{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow mb-4">
+            <div class="card-header">
+                <h3 class="mb-0">Product Review Search</h3>
+            </div>
+            <div class="card-body">
+                <form id="review-form" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="product_info" class="form-label">Product Name/Description</label>
+                        <input type="text" class="form-control" id="product_info" name="product_info" placeholder="e.g., Sony WH-1000XM4 Headphones">
+                    </div>
+                    <div class="mb-3">
+                        <label for="product_image" class="form-label">Or Upload a Product Image</label>
+                        <input type="file" class="form-control" id="product_image" name="product_image" accept="image/*">
+                        <div class="form-text">Supported formats: JPG, PNG, GIF (Max size: 16MB)</div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary" id="submit-btn">Get Product Review</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card shadow" id="review-results" style="display: none;">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">Review Results</h3>
+                <button class="btn btn-sm btn-outline-secondary" id="new-search-btn">New Search</button>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3" id="loading" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Generating review, please wait...</p>
+                </div>
+                <div id="review-content"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card shadow mb-4">
+            <div class="card-header">
+                <h4 class="mb-0">Search History</h4>
+            </div>
+            <div class="card-body" id="search-history">
+                <p class="text-muted">Your recent searches will appear here.</p>
+                <!-- History items will be loaded via JavaScript -->
+            </div>
+        </div>
+        <!--
+        <div class="card shadow">
+            <div class="card-header">
+                <h4 class="mb-0">Tips</h4>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">Be specific with product names and models</li>
+                    <li class="list-group-item">Upload clear images of products</li>
+                    <li class="list-group-item">Use follow-up questions for more details</li>
+                    <li class="list-group-item">Check multiple similar products for comparison</li>
+                </ul>
+            </div>
+        </div>
+        -->
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const reviewForm = document.getElementById('review-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const loadingIndicator = document.getElementById('loading');
+    const reviewResults = document.getElementById('review-results');
+    const reviewContent = document.getElementById('review-content');
+    const newSearchBtn = document.getElementById('new-search-btn');
+    
+    // Handle form submission
+    reviewForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(reviewForm);
+        const productInfo = formData.get('product_info');
+        const productImage = formData.get('product_image');
+        
+        // Basic validation
+        if (!productInfo && (!productImage || productImage.size === 0)) {
+            alert('Please enter a product name or upload an image');
+            return;
+        }
+        
+        // Show loading state
+        submitBtn.disabled = true;
+        loadingIndicator.style.display = 'block';
+        reviewResults.style.display = 'block';
+        reviewContent.innerHTML = '';
+        
+        // Submit form data
+        fetch('/get_review', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Display review
+            loadingIndicator.style.display = 'none';
+            
+            if (data.error) {
+                reviewContent.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+            } else {
+                // Format review with Markdown-like processing
+                let formattedReview = data.review
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold text
+                    .replace(/\n\n/g, '</p><p>') // Paragraphs
+                    .replace(/\n/g, '<br>'); // Line breaks
+                
+                reviewContent.innerHTML = `<p>${formattedReview}</p>`;
+                
+                // Update search history (could be implemented to use local storage or fetch from server)
+                updateSearchHistory(productInfo || 'Image Upload');
+            }
+        })
+        .catch(error => {
+            loadingIndicator.style.display = 'none';
+            reviewContent.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+        });
+    });
+    
+    // New search button
+    newSearchBtn.addEventListener('click', function() {
+        reviewForm.reset();
+        reviewResults.style.display = 'none';
+    });
+    
+    // Simple function to update search history
+    function updateSearchHistory(query) {
+        const searchHistory = document.getElementById('search-history');
+        const date = new Date().toLocaleString();
+        
+        // Clear "no history" message if present
+        if (searchHistory.querySelector('.text-muted')) {
+            searchHistory.innerHTML = '';
+        }
+        
+        // Add new history item
+        const historyItem = document.createElement('div');
+        historyItem.className = 'search-history-item mb-2 p-2 border-bottom';
+        historyItem.innerHTML = `
+            <div class="fw-bold">${query}</div>
+            <small class="text-muted">${date}</small>
+        `;
+        
+        // Add click event to re-run search
+        historyItem.style.cursor = 'pointer';
+        historyItem.addEventListener('click', function() {
+            document.getElementById('product_info').value = query;
+            submitBtn.click();
+        });
+        
+        searchHistory.prepend(historyItem);
+    }
+});
+</script>
+{% endblock %}

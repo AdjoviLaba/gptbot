@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Product Review AI{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-body text-center py-5">
+                <h1 class="display-4 mb-4">Product Review Summary</h1>
+                <p class="lead">Get a summary of review about a product</p>
+                <p class="mb-4">Enter a product name or upload an image to get started</p>
+                
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg">Go to Dashboard</a>
+                {% else %}
+                <div class="d-grid gap-2 d-md-block">
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Login</a>
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-outline-primary">Register</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+    </div>
+</div>
+{% endblock %}

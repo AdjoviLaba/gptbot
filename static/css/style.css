@@ -1,0 +1,117 @@
+/* Custom styles for Product Review AI */
+
+/* Body and general styles */
+body {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+footer {
+    margin-top: auto;
+}
+
+/* Card styles */
+.card {
+    border-radius: 0.5rem;
+    overflow: hidden;
+    border: none;
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    background-color: #f8f9fb;
+    border-bottom: 1px solid rgba(0,0,0,.075);
+    padding: 1rem 1.25rem;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.card-footer {
+    background-color: #f8f9fb;
+    border-top: 1px solid rgba(0,0,0,.075);
+    padding: 1rem 1.25rem;
+}
+
+.shadow {
+    box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,.075) !important;
+}
+
+/* Form controls */
+.form-control:focus {
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    border-color: #86b7fe;
+}
+
+/* Review content styling */
+#review-content {
+    line-height: 1.6;
+}
+
+#review-content p {
+    margin-bottom: 1rem;
+}
+
+#review-content strong {
+    color: #0d6efd;
+}
+
+/* Search history items */
+.search-history-item {
+    transition: background-color 0.2s;
+}
+
+.search-history-item:hover {
+    background-color: #f0f7ff;
+}
+
+/* Utility classes */
+.text-primary {
+    color: #0d6efd !important;
+}
+
+.bg-primary {
+    background-color: #0d6efd !important;
+}
+
+.btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+}
+
+.btn-outline-primary {
+    color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.btn-outline-primary:hover {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    color: white;
+}
+
+/* Loading spinner */
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
